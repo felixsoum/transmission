@@ -53,7 +53,7 @@ public class FirstPersonController : MonoBehaviour
         transform.Rotate(0, horizontal * Time.deltaTime * 200f, 0);
 
         Vector3 compassAngle = compass.localEulerAngles;
-        compassAngle.z = -transform.eulerAngles.y;
+        compassAngle.z = transform.eulerAngles.y;
         compass.localEulerAngles = compassAngle;
 
 
