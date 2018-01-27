@@ -1,28 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using XInputDotNetPure;
 
 public class FirstPersonController : MonoBehaviour
 {
-    public int playerIndex;
+    public float scannerDetectionRange = 20f;
+    public float vibrationMax = 0.25f;
+    public float vibrationMin = 0.01f;
+
+    public int playerIndex = 1;
     public GameObject playerCamera;
+    public FirstPersonController otherPlayer;
     Rigidbody body;
+    GameObject[] scanners;
 
     private void Awake()
     {
         body = GetComponent<Rigidbody>();
     }
 
-    // Use this for initialization
-    void Start () {
-		
+    void Start()
+    {
+        scanners = GameObject.FindGameObjectsWithTag("Scanner");
 	}
 	
-	// Update is called once per frame
-	void Update () {
+	void Update()
+    {
         UpdateMove();
         UpdateRotate();
-
+        UpdateScannerVibration();
     }
 
     void UpdateMove()
@@ -53,5 +60,31 @@ public class FirstPersonController : MonoBehaviour
         }
         cameraX = Mathf.Clamp(cameraX, -90f, 90f);
         playerCamera.transform.localEulerAngles = new Vector3(cameraX, 0, 0);
+    }
+
+    void UpdateScannerVibration()
+    {
+        float closestDistance = float.MaxValue;
+        foreach (GameObject scanner in scanners)
+        {
+            closestDistance = Mathf.Min(Vector3.Distance(scanner.transform.position, transform.position), closestDistance);
+        }
+
+        float strength = 0;
+        if (closestDistance <= scannerDetectionRange)
+        {
+            strength = (1f - closestDistance / scannerDetectionRange) * (vibrationMax - vibrationMin) + vibrationMin;
+        }
+        otherPlayer.Vibrate(strength);
+    }
+
+    public void Vibrate(float strength)
+    {
+        GamePad.SetVibration((PlayerIndex)(playerIndex - 1), strength, strength);
+    }
+
+    private void OnDestroy()
+    {
+        GamePad.SetVibration((PlayerIndex)(playerIndex - 1), 0, 0);
     }
 }
