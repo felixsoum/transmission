@@ -12,6 +12,7 @@ public class FirstPersonController : MonoBehaviour
     public int playerIndex = 1;
     public GameObject playerCamera;
     public FirstPersonController otherPlayer;
+    public RectTransform compass;
     Rigidbody body;
     GameObject[] scanners;
 
@@ -50,6 +51,11 @@ public class FirstPersonController : MonoBehaviour
         float horizontal = Input.GetAxis("HorizontalRight" + playerIndex);
 
         transform.Rotate(0, horizontal * Time.deltaTime * 200f, 0);
+
+        Vector3 compassAngle = compass.localEulerAngles;
+        compassAngle.z = -transform.eulerAngles.y;
+        compass.localEulerAngles = compassAngle;
+
 
         float vertical = Input.GetAxis("VerticalRight" + playerIndex);
 
