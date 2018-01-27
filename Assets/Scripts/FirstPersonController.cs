@@ -67,7 +67,10 @@ public class FirstPersonController : MonoBehaviour
         float closestDistance = float.MaxValue;
         foreach (GameObject scanner in scanners)
         {
-            closestDistance = Mathf.Min(Vector3.Distance(scanner.transform.position, transform.position), closestDistance);
+            if (scanner)
+            {
+                closestDistance = Mathf.Min(Vector3.Distance(scanner.transform.position, transform.position), closestDistance);
+            }
         }
 
         float strength = 0;
