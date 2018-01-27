@@ -9,6 +9,13 @@ public class FirstPersonController : MonoBehaviour
     public float vibrationMax = 0.25f;
     public float vibrationMin = 0.01f;
 
+	public const int vibrationBaseFreq = 60;
+	public const int vibrationBaseDur = 20;
+	private int vibrationUpper { get { return vibrationFreq + vibrationDur; } }
+	private int vibrationFreq = vibrationBaseFreq;		// Number of frames between vibration
+	private int vibrationDur = vibrationBaseDur;		// Number of frames to vibrate
+	private int vibrationCounter = 0;					// Counts number of frames
+
     public int playerIndex = 1;
     public GameObject playerCamera;
     public FirstPersonController otherPlayer;
@@ -31,6 +38,8 @@ public class FirstPersonController : MonoBehaviour
         UpdateMove();
         UpdateRotate();
         UpdateScannerVibration();
+
+		vibrationCounter++;
     }
 
     void UpdateMove()
@@ -80,10 +89,16 @@ public class FirstPersonController : MonoBehaviour
         }
 
         float strength = 0;
-        if (closestDistance <= scannerDetectionRange)
-        {
-            strength = (1f - closestDistance / scannerDetectionRange) * (vibrationMax - vibrationMin) + vibrationMin;
-        }
+		if (closestDistance <= scannerDetectionRange && vibrationFreq <= vibrationCounter && vibrationCounter <= vibrationUpper) {
+			strength = (1f - closestDistance / scannerDetectionRange) * (vibrationMax - vibrationMin) + vibrationMin;
+
+			vibrationFreq =	vibrationBaseFreq - (int) ((1.2f - closestDistance / scannerDetectionRange) * (vibrationBaseFreq));
+		} 
+
+		if (vibrationCounter >= vibrationUpper) {
+			vibrationCounter = 0;
+		}
+
         otherPlayer.Vibrate(strength);
     }
 
