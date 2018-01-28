@@ -57,14 +57,22 @@ public class FirstPersonController : MonoBehaviour
         float horizontal = Input.GetAxis("HorizontalLeft" + playerIndex);
         float vertical = Input.GetAxis("VerticalLeft" + playerIndex);
 
-        Vector3 move = transform.right * horizontal + transform.forward * vertical;
+        Vector3 projectedRight = camera.transform.right;
+        projectedRight.y = 0;
+        projectedRight.Normalize();
 
-		direction = camera.transform.TransformDirection(move);
-		direction = new Vector3 (direction.x, 0, direction.z).normalized;
+        Vector3 projectedForward = camera.transform.forward;
+        projectedForward.y = 0;
+        projectedForward.Normalize();
 
-		move = move.magnitude * direction;
+        Vector3 move = projectedRight * horizontal + projectedForward * vertical;
 
-		move = playerIndex == 1 ? -move : move;		// bug: player 1 movement direction is inverted.
+		//direction = camera.transform.TransformDirection(move);
+		//direction = new Vector3 (direction.x, 0, direction.z).normalized;
+
+		//move = move.magnitude * direction;
+
+		//move = playerIndex == 1 ? -move : move;		// bug: player 1 movement direction is inverted.
 
         if (move.magnitude > 1)
         {
@@ -73,6 +81,8 @@ public class FirstPersonController : MonoBehaviour
         body.AddForce(move * Time.deltaTime * 5000f);
 
 		direction = move;
+
+        meshObject.transform.forward = Vector3.Lerp(meshObject.transform.forward, new Vector3(move.x, 0, move.z).normalized, Time.deltaTime * 10f);
     }
 
     void UpdateRotate()
@@ -94,7 +104,7 @@ public class FirstPersonController : MonoBehaviour
 		//	transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction, Vector3.up), 5f * Time.deltaTime);
 
         Vector3 compassAngle = compass.localEulerAngles;
-        compassAngle.z = transform.eulerAngles.y;
+        compassAngle.z = camera.transform.eulerAngles.y;
         compass.localEulerAngles = compassAngle;
 
 
@@ -108,7 +118,7 @@ public class FirstPersonController : MonoBehaviour
         //cameraX = Mathf.Clamp(cameraX, -90f, 90f);
         //playerCamera.transform.localEulerAngles = new Vector3(cameraX, 0, 0);
 
-        meshObject.transform.forward = new Vector3(camera.transform.forward.x, 0, camera.transform.forward.z).normalized;
+        
     }
 
     void UpdateScannerVibration()
@@ -133,7 +143,7 @@ public class FirstPersonController : MonoBehaviour
 			vibrationCounter = 0;
 		}
 
-        otherPlayer.Vibrate(strength);
+        Vibrate(strength);
     }
 
     public void Vibrate(float strength)
